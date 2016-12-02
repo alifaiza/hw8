@@ -5,9 +5,8 @@ import java.util.*;
 public class HuffmanTree {
 	public Node root;
 	public Map<Integer, String> encodes;
-	public Map<String, Integer> decodes;
-	
-	
+
+
 	public HuffmanTree(Map<Short, Integer> m) {
 		m.put((short) 256, 1);
 		PriorityQueue<Node> queue = new PriorityQueue<Node>();
@@ -24,9 +23,9 @@ public class HuffmanTree {
 		this.root = queue.poll();
 		buildEncodes(this.root, "");
 	}
-	
-	
-	
+
+
+
 	public void inOrder() {
 		inOrder(root);
 	}
@@ -51,29 +50,31 @@ public class HuffmanTree {
 	}
 
 	private void buildEncodes(Node node, String str) {
-		if (node.left != null && node.right != null)  {
-			buildEncodes(node.left, str + "0");
-			buildEncodes(node.right, str + "1");
-		} else {
+		if (node.left == null && node.right == null)  {
 			encodes.put((int) node.ch, str);
+		} if (node.left != null && node.right == null)  {
+			buildEncodes(node.left, str + '0');
+		} if (node.left == null && node.right != null)  {
+			buildEncodes(node.right, str + '1');
 		}
 	}
 
 
 
-	
+
 	public void encode(BitInputStream in, BitOutputStream out) {
 		int index = 0;
 		boolean go = true;
-		
+
 		while(go) {
 			if(in.hasBits()) {
 				index = in.readBits(8);
 			} else {
 				index = 256;
 				go = false;
+				break;
 			}
-			
+
 			String treePath = this.encodes.get(index);
 			for(int i = 0; i < treePath.length(); i++) {
 				if(treePath.charAt(i) == '1')  {
@@ -84,10 +85,10 @@ public class HuffmanTree {
 				} else {
 					throw new IllegalArgumentException("Not binary");
 				}
- 			}
+			}
 		}
 	}
-	
+
 	public void decode(BitInputStream in, BitOutputStream out) {
 		while(in.hasBits())  {
 			Node node = this.root;
@@ -107,15 +108,16 @@ public class HuffmanTree {
 			}
 		}
 	}
-	
+
 	public static void main(String[] args) {
-		Map<Short, Integer> m = new HashMap<Short, Integer>();
-		for(int i = 0; i < 4; i++) {
-			m.put((short) i, i + 1);
-		}
-		HuffmanTree tree = new HuffmanTree(m);
-		tree.inOrder();
+//		Map<Short, Integer> m = new HashMap<Short, Integer>();
+//		for(int i = 0; i < 4; i++) {
+//			m.put((short) i, i + 1);
+//		}
+//		HuffmanTree tree = new HuffmanTree(m);
+//		tree.inOrder();
+		GrinEncoder 
 	}
 
-	
+
 }

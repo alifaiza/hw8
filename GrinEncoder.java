@@ -9,18 +9,14 @@ public class GrinEncoder {
 	public Map<Short, Integer> createFrequencyMap(String file) throws IOException {
 		Map<Short, Integer> map = new HashMap<Short, Integer>();
 		BitInputStream in = new BitInputStream(file);
-		boolean go = true;
-		Short sh = (short) in.readBits(8);
-		while(go) {
-			if(sh == -1)  {
-				go = false;
-			}
+		while(in.hasBits()) {
+			Short sh = (short) in.readBits(8);
 			if (map.containsKey(sh)) {
 				map.put(sh, map.get(sh) + 1);
 			} else {
 				map.put(sh, 1);
 			}
-			sh = (short) in.readBits(8);
+			
 		}
 		in.close();
 		return map;
@@ -31,7 +27,7 @@ public class GrinEncoder {
 		BitOutputStream out = new BitOutputStream(outfile);
 		HuffmanTree tree = new HuffmanTree(map);
 		out.writeBits(1846, 32);
-		out.writeBits(250, 32);
+		out.writeBits(map.size(), 32);
 		Iterator<Short> keys = map.keySet().iterator();
 		while(keys.hasNext()) {
 			short key = keys.next();
