@@ -1,12 +1,12 @@
 package hw8;
 
+import java.io.IOException;
 import java.util.*;
 
 public class HuffmanTree {
 	public Node root;
-	public Map<Integer, String> encodes;
-
-
+	public Map<Short, String> encodes;
+	
 	public HuffmanTree(Map<Short, Integer> m) {
 		m.put((short) 256, 1);
 		PriorityQueue<Node> queue = new PriorityQueue<Node>();
@@ -21,14 +21,14 @@ public class HuffmanTree {
 			queue.add(new Node(temp1.freq + temp2.freq, temp1, temp2));
 		}
 		this.root = queue.poll();
+		this.encodes = new HashMap<Short, String>();
 		buildEncodes(this.root, "");
 	}
-
-
-
+	
 	public void inOrder() {
 		inOrder(root);
 	}
+	
 	public static void inOrder(Node n) {
 		if(n.left == null && n.right == null) {
 			System.out.println("Character code: " + n.ch);
@@ -50,45 +50,50 @@ public class HuffmanTree {
 	}
 
 	private void buildEncodes(Node node, String str) {
-		if (node.left == null && node.right == null)  {
-			encodes.put((int) node.ch, str);
-		} if (node.left != null && node.right == null)  {
-			buildEncodes(node.left, str + '0');
-		} if (node.left == null && node.right != null)  {
-			buildEncodes(node.right, str + '1');
+		if (node.left == null && node.right == null) {
+			encodes.put(node.ch, str);
+			str = "";
+		}
+		if (node.left != null) {
+			buildEncodes(node.left, str + "0");
+		}
+		if (node.right != null) {
+			buildEncodes(node.right, str + "1");
 		}
 	}
-
-
-
-
+	
 	public void encode(BitInputStream in, BitOutputStream out) {
-		int index = 0;
-		boolean go = true;
-
-		while(go) {
-			if(in.hasBits()) {
-				index = in.readBits(8);
-			} else {
-				index = 256;
-				go = false;
-				break;
-			}
-
-			String treePath = this.encodes.get(index);
+		short value = (short) in.readBits(8);
+		while(value != -1) {
+			String treePath = this.encodes.get((short) value);
 			for(int i = 0; i < treePath.length(); i++) {
 				if(treePath.charAt(i) == '1')  {
 					out.writeBit(1);
-				}
-				if(treePath.charAt(i) == '0')  {
+					System.out.print('1');
+				} else if(treePath.charAt(i) == '0')  {
 					out.writeBit(0);
+					System.out.print('0');
 				} else {
 					throw new IllegalArgumentException("Not binary");
 				}
+ 			}
+			value = (short) in.readBits(8);
+			System.out.println("");
+		}
+		String eof = encodes.get((short) 256);
+		for(int i = 0; i < eof.length(); i++) {
+			if(eof.charAt(i) == '1')  {
+				out.writeBit(1);
+				System.out.print('1');
+			} else if(eof.charAt(i) == '0')  {
+				out.writeBit(0);
+				System.out.print('0');
+			} else {
+				throw new IllegalArgumentException("Not binary");
 			}
 		}
 	}
-
+	
 	public void decode(BitInputStream in, BitOutputStream out) {
 		while(in.hasBits())  {
 			Node node = this.root;
@@ -108,16 +113,13 @@ public class HuffmanTree {
 			}
 		}
 	}
-
-	public static void main(String[] args) {
-//		Map<Short, Integer> m = new HashMap<Short, Integer>();
-//		for(int i = 0; i < 4; i++) {
-//			m.put((short) i, i + 1);
-//		}
-//		HuffmanTree tree = new HuffmanTree(m);
-//		tree.inOrder();
-		GrinEncoder 
+	
+	public static void main(String[] args) throws IOException {
+		GrinEncoder g = new GrinEncoder();
+		GrinDecoder u = new GrinDecoder();
+		g.encode("/Users/zoegrubbs/Documents/workspace/HuffmanTree/src/huffman-example.txt", 
+				"/Users/zoegrubbs/Documents/workspace/HuffmanTree/src/test.grin");
+		u.decode("/Users/zoegrubbs/Documents/workspace/HuffmanTree/src/test.grin", 
+				"/Users/zoegrubbs/Documents/workspace/HuffmanTree/src/test2.txt");
 	}
-
-
 }
